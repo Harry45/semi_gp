@@ -1,1 +1,1 @@
-# Gaussian Process With a Basis Function
+### Gaussian Process With a Basis Function
