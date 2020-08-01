@@ -7,7 +7,3 @@ In this work, we will emulate the MOPED coefficients only and is function of the
 $$
 \left[\Omega_{\textrm{cdm}}h^{2},\,\Omega_{\textrm{b}}h^{2},\,\textrm{ln}\left(10^{10}A_{s}\right),\,n_{s},\,h,\,\Sigma m_{\nu}\right]
 $$
-
-<script type="text/javascript" async
-
-src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
