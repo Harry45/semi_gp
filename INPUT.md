@@ -5,4 +5,4 @@ This is an extension of our work published in <a href="https://doi.org/10.1093/m
 
 In this work, we will emulate the MOPED coefficients only and is function of the following parameters: 
 
-<p align="center"><img src="svgs/59d9e0346e7b48e1e15481dc47ca5f0f.svg?invert_in_darkmode" align=middle width=298.98615615pt height=19.9563243pt/></p>
+$$ \left[\Omega_{\textrm{cdm}}h^{2},\,\Omega_{\textrm{b}}h^{2},\,\textrm{ln}\left(10^{10}A_{s}\right),\,n_{s},\,h,\,\Sigma m_{\nu}\right] $$
