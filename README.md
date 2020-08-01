@@ -6,4 +6,4 @@ This is an extension of our work published in <a href="https://doi.org/10.1093/m
 
 In this work, we will emulate the MOPED coefficients only and is function of the following parameters: $\omega$
 
-<img src="https://latex.codecogs.com/svg.latex?\normal&space; \left[\right]"/>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\left[\Omega_{\textrm{cdm}}h^{2},\Omega_{\textrm{b}}h^{2},\textrm{ln}\left(10^{10}A_{s}\right),n_{s},h,\Sigma&space;m_{\nu}\right]" target="_blank"><img src="https://latex.codecogs.com/svg.latex?\left[\Omega_{\textrm{cdm}}h^{2},\Omega_{\textrm{b}}h^{2},\textrm{ln}\left(10^{10}A_{s}\right),n_{s},h,\Sigma&space;m_{\nu}\right]" title="\left[\Omega_{\textrm{cdm}}h^{2},\Omega_{\textrm{b}}h^{2},\textrm{ln}\left(10^{10}A_{s}\right),n_{s},h,\Sigma m_{\nu}\right]" /></a>
