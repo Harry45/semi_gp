@@ -6,4 +6,4 @@ This is an extension of our work published in <a href="https://doi.org/10.1093/m
 
 In this work, we will emulate the MOPED coefficients only and is function of the following parameters: $\omega$
 
-<img src="https://latex.codecogs.com/svg.latex?\normal&space; \left[\right]/>
+<img src="https://latex.codecogs.com/svg.latex?\normal&space; \left[\right]"/>
