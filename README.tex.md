@@ -1,6 +1,6 @@
 # GP Emulator For KiDS-450 Analysis 
 
-We use the publicly available KiDS-450 data (see <a href="http://kids.strw.leidenuniv.nl/sciencedata.php">here</a>). 
+We use the publicly available KiDS-450 data (see <a href="http://kids.strw.leidenuniv.nl/sciencedata.php">here</a>). $\omega_{m}$
 
 In particular, we emulate three quantities
 - $\sigma_{8}$ (<a href="https://github.com/Harry45/gp_emulator/tree/master/sigma_eight">here</a>)
