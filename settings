@@ -1,0 +1,132 @@
+# -----------------------------------------------------------------------------
+
+# KiDS-450 Settings
+
+data_directory = '/home/harry/Dropbox/gp_emulator/data_for_likelihood/'
+
+photoz_method = 'Nz_DIR'
+
+bootstrap_photoz_errors  = False # True #  
+
+m_correction = False
+
+index_bootstrap_low = 0
+
+index_bootstrap_high = 999
+
+k_max_h_by_Mpc = 50.
+
+nzmax = 72 
+
+nellsmax = 39 
+
+mode = 'halofit'
+
+zbin_min = [0.10, 0.30, 0.60]
+
+zbin_max = [0.30, 0.60, 0.90]
+
+bands_EE_to_use = [0, 1, 1, 1, 1, 0, 0]
+
+bands_BB_to_use = [1, 1, 1, 1, 0, 0]
+
+baryon_model = 'AGN'
+
+use_nuisance = ['A_bary', 'A_IA', 'A_noise_z1', 'A_noise_z2', 'A_noise_z3']
+
+# -----------------------------------------------------------------------------
+# Priors
+# The priors are defined in this format and 
+# ordered in the way illustrated below.
+
+from collections import OrderedDict
+
+prior = OrderedDict()
+
+prior['omega_cdm'] = [0.010, 0.390, 'uniform']
+
+prior['omega_b'] = [0.019, 0.007, 'uniform']
+
+prior['ln10^{10}A_s'] = [1.700, 3.300, 'uniform']
+
+prior['n_s'] = [0.700, 0.600, 'uniform']
+
+prior['h'] = [0.640, 0.180, 'uniform']
+
+prior['A_bary'] = [0.000, 2.00, 'uniform']
+
+prior['m_ncdm'] = [0.06, 0.94, 'uniform']
+
+prior['A_n1'] = [-0.100, 0.200, 'uniform']
+
+prior['A_n2'] = [-0.100, 0.200, 'uniform']
+
+prior['A_n3'] = [-0.100, 0.200, 'uniform']
+
+prior['A_IA'] = [-6.00, 12.00, 'uniform']
+
+# -----------------------------------------------------------------------------
+
+# Settings for the EMCEE Sampler
+
+eps = [1E-3, 1E-4, 0.01, 0.01, 1E-3, 0.1, 0.01, 1E-4, 1E-4, 1E-4, 0.1]
+
+n_samples = 15000
+
+n_walkers = 22
+
+# -----------------------------------------------------------------------------
+
+# Settings for the emulator
+
+# noise/jitter term
+var = 1E-5
+
+# another jitter term for numerical stability
+jitter = 1E-5
+
+# width of the Gaussian Prior (parametric part)
+lambda_cap = 1000
+
+# order of the polynomial (maximum is 2)
+order = 2
+
+# Transform input (pre-whitening)
+x_trans = True
+
+# Transform output (logarithm transform)
+y_trans = False
+
+# Centre output on 0 if we want
+use_mean = False
+
+# Number of times we want to restart the optimiser
+n_restart = 5
+
+# minimum lengthscale (in log)
+l_min = -5.0
+
+# maximum lengthscale (in log)
+l_max = 5.0
+
+# minimum amplitude (in log)
+a_min = 0.0
+
+# maximum amplitude (in log)
+a_max = 25.0
+
+# choice of optimizer (better to use 'L-BFGS-B')
+method = 'L-BFGS-B'
+
+# tolerance to stop the optimizer
+ftol = 1E-20
+
+# maximum number of iterations
+maxiter = 500
+# -----------------------------------------------------------------------------
+
+# Switch on/off emulator
+
+emulator = False
+
+# -----------------------------------------------------------------------------
