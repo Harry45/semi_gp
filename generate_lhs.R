@@ -6,8 +6,9 @@
 setwd('/home/harry/Dropbox/Semi-GP/dev/')
 library(lhs)
 n = 1000
-d = 7
-# X = maximinLHS(n, d)
-X = optimumLHS(n, d)
-write.csv(X, 'lhs/optimum_1000_7D')
+d = 6
+X = maximinLHS(n, d)
+# X = optimumLHS(n, d)
+# X = randomLHS(n, d)
+write.csv(X, 'lhs/maximin_1000_6D')
 

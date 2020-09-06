@@ -6,7 +6,7 @@ data_directory = '/home/harry/Dropbox/gp_emulator/data_for_likelihood/'
 
 photoz_method = 'Nz_DIR'
 
-bootstrap_photoz_errors  = False # True #  
+bootstrap_photoz_errors  = False # True # 
 
 m_correction = False
 
@@ -127,6 +127,14 @@ maxiter = 500
 
 # Switch on/off emulator
 
-emulator = False
+emulator = True # False # 
+
+# -----------------------------------------------------------------------------
+
+eight_dimensional = False # True # 
+
+# -----------------------------------------------------------------------------
+
+zero_mean_gp = True
 
 # -----------------------------------------------------------------------------

@@ -42,6 +42,9 @@ class MOPED:
         # store the GPs
         self.gps = None
 
+        # store the lhs method
+        self.lhs_method = None
+
     def compression(self, eps, parameters):
         '''
         Compressing the data via MOPED (central finite difference method)
@@ -173,9 +176,6 @@ class MOPED:
             y_alphas (np.ndarray): the compressed data
         '''
 
-        if '/' in folder_name:
-            folder_name = folder_name.replace('/', '')
-
         b_matrix = np.load(folder_name + '/B.npz')['arr_0']
 
         y_alphas = np.load(folder_name + '/y.npz')['arr_0']
@@ -251,7 +251,7 @@ class MOPED:
 
         return sys_comp
 
-    def load_gps(self, folder_name):
+    def load_gps(self, folder_name, lhs_method):
         '''
         We will load all the trained Gaussian Processes and we will use
         them to make predictions at points in parameter space
@@ -260,30 +260,49 @@ class MOPED:
         ------
         folder_name (str) : name of the folder where we store the GPs
 
-        spectra (list) : a list of all the spectra (gg, gi, ii)
+        lhs_method (str) : the method we have generated the LHS samples, for example, optimum_500
 
         Returns
         -------
         gps (dictionary) : a dictionary with all the trained GPs
         '''
 
-        # specify the spectra we need - this is by default
-        spectra=['gg', 'gi', 'ii']
-
         # we need the number of MOPED coefficients to record all the GPs
         assert isinstance(self.n_moped, int), 'Call the function load_vectors prior to load_gps'
 
-        # number of different compressed data types
-        n_spectra = len(spectra)
+        if self.kids.settings.eight_dimensional:
 
-        # dictionary to store all the GPs
-        gps = {}
-
-        for j in range(n_spectra):
-            gps[spectra[j]] = []
+            # create an empty list to store all GPs
+            gps = []
 
             for i in range(self.n_moped):
-                gps[spectra[j]].append(hp.load_pkl_file(folder_name + '/' + spectra[j], 'gp_' + str(i)))
+                gps.append(hp.load_pkl_file(folder_name + '/' + lhs_method, 'gp_' + str(i)))
+
+        else:
+
+            # specify the spectra we need - this is by default
+            if self.kids.settings.zero_mean_gp:
+
+                spectra = ['zero_gg_' + lhs_method, 'zero_gi_' + lhs_method, 'zero_ii_' + lhs_method]
+
+            else:
+
+                spectra = ['gg_' + lhs_method, 'gi_' + lhs_method, 'ii_' + lhs_method]
+
+            # update the lhs method
+            self.lhs_method = lhs_method
+
+            # number of different compressed data types
+            n_spectra = len(spectra)
+
+            # dictionary to store all the GPs
+            gps = {}
+
+            for j in range(n_spectra):
+                gps[spectra[j]] = []
+
+                for i in range(self.n_moped):
+                    gps[spectra[j]].append(hp.load_pkl_file(folder_name + '/' + spectra[j], 'gp_' + str(i)))
 
         self.gps = gps
 
@@ -303,25 +322,6 @@ class MOPED:
             comp (np.ndarray): array of compressed theory of size ndim
         '''
 
-        if self.kids.settings.emulator:
-
-            # the first 7 parameters are inputs to the emulator
-            test_point = par[0:7]
-
-            gg_comp = np.zeros(self.n_moped)
-            gi_comp = np.zeros(self.n_moped)
-            ii_comp = np.zeros(self.n_moped)
-
-            for i in range(self.n_moped):
-                # we are using the mean only
-                gg_comp[i] = self.gps['gg'][i].prediction(test_point, return_var=False)
-                gi_comp[i] = self.gps['gi'][i].prediction(test_point, return_var=False)
-                ii_comp[i] = self.gps['ii'][i].prediction(test_point, return_var=False)
-
-        else:
-            # get the expensive part
-            gg_comp, gi_comp, ii_comp = self.compress_theory_lensing(par)
-
         # systematic part
         systematic_part = self.compress_theory_systematics(par)
 
@@ -329,7 +329,55 @@ class MOPED:
         cosmo, syst, other, neut = self.kids.dictionary_params(par)
         del cosmo, other, neut
 
-        comp = gg_comp + np.power(syst['A_IA'], 2) * ii_comp + syst['A_IA'] * gi_comp + systematic_part
+        if self.kids.settings.emulator:
+
+            if self.kids.settings.eight_dimensional:
+
+                # the first 7 parameters and last parameter are inputs to the emulator
+                test_point = np.concatenate([par[0:7], par[-1:]])
+
+                comp_total = np.zeros(self.n_moped)
+
+                for i in range(self.n_moped):
+                    # we are using the mean only
+                    comp_total[i] = self.gps[i].prediction(test_point, return_var=False)
+
+                # calculate the total MOPED coefficient
+                comp = comp_total + systematic_part
+
+            else:
+                # the first 7 parameters are inputs to the emulator
+                test_point = par[0:7]
+
+                gg_comp = np.zeros(self.n_moped)
+                gi_comp = np.zeros(self.n_moped)
+                ii_comp = np.zeros(self.n_moped)
+
+                for i in range(self.n_moped):
+
+                    # we are using the mean only
+
+                    if self.kids.settings.zero_mean_gp:
+
+                        gg_comp[i] = self.gps['zero_gg_' + self.lhs_method][i].prediction(test_point, returnvar=False)
+                        gi_comp[i] = self.gps['zero_gi_' + self.lhs_method][i].prediction(test_point, returnvar=False)
+                        ii_comp[i] = self.gps['zero_ii_' + self.lhs_method][i].prediction(test_point, returnvar=False)
+
+                    else:
+
+                        gg_comp[i] = self.gps['gg_' + self.lhs_method][i].prediction(test_point, return_var=False)
+                        gi_comp[i] = self.gps['gi_' + self.lhs_method][i].prediction(test_point, return_var=False)
+                        ii_comp[i] = self.gps['ii_' + self.lhs_method][i].prediction(test_point, return_var=False)
+
+                # calculate the total MOPED coefficient
+                comp = gg_comp + np.power(syst['A_IA'], 2) * ii_comp + syst['A_IA'] * gi_comp + systematic_part
+
+        else:
+            # get the expensive part (using CLASS directly)
+            gg_comp, gi_comp, ii_comp = self.compress_theory_lensing(par)
+
+            # calculate the total MOPED coefficient
+            comp = gg_comp + np.power(syst['A_IA'], 2) * ii_comp + syst['A_IA'] * gi_comp + systematic_part
 
         return comp
 
@@ -423,3 +471,28 @@ class MOPED:
             np.savez_compressed(folder_name + '/simulations.npz', record)
 
         return record
+
+    def compress_theory_total(self, par):
+        '''
+        In this case, we calculate the total band power, that is, we include the intrinsic alignment parameter in the output, that is, it is an 8D function.
+
+        Inputs
+        ------
+        par (np.ndarray) : array of parameters
+
+        Outputs
+        -------
+        total_band (np.ndarray) : the total band powers
+        '''
+
+        # get the individual compressed data/theory
+        gg_comp, gi_comp, ii_comp = self.compress_theory_lensing(par)
+
+        # we need A_IA to compute the sum
+        cosmo, syst, other, neut = self.kids.dictionary_params(par)
+        del cosmo, other, neut
+
+        # calculate the total band powers (compressed)
+        total_band_comp = gg_comp + np.power(syst['A_IA'], 2) * ii_comp + syst['A_IA'] * gi_comp
+
+        return total_band_comp

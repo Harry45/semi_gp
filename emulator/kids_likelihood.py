@@ -105,17 +105,9 @@ class KiDSlike:
         self.m_vec = None
         self.m_cov = None
 
-        # we need redshifts and maximum redshift for the new method for computing power spectra
-
-        self.redshift_new = None
-        self.zmax_new = None
         #----------------------------------------------------------------------------------#
         # load all files
         self.load_files()
-
-        # this is for testing - we need the redshifts anyway for the computing the power spectra
-        # with the new technique
-        self.redshift_new, _ , _ , self.zmax_new = self.read_redshifts()
 
         # Fix redshift if we are using mean
         if not self.settings.bootstrap_photoz_errors:
@@ -389,10 +381,74 @@ class KiDSlike:
 
         return pk_matter, dict_quantities
 
+    def calculate_sigma(self, par, r, z = 0):
+        '''
+        Calculate the value of sigma at any arbitrary value of R
+
+        Inputs
+        ------
+        par (np.ndarray) : array of cosmological parameters
+
+        r (float) : is the radius in units of Mpc
+
+        z (float) : is the redshift 
+        '''
+
+        # setting for the cosmology
+        cosmo_params = {'omega_cdm': par[0], 'omega_b': par[1], 'ln10^{10}A_s': par[2], 'n_s': par[3], 'h': par[4]}
+
+        # setting for neutrino
+        other_settings = {'N_ncdm': 1.0, 'deg_ncdm': 3.0, 'T_ncdm': 0.71611, 'N_ur': 0.00641}
+
+        # neutrino setting
+        neutrino_settings = {'m_ncdm': par[5] / other_settings['deg_ncdm']}
+
+        # CLASS takes R in Mpc/h as input (be careful)
+        r_Mpc_per_h = r/cosmo_params['h']
+
+        # check if zmax has been assigned a value (no if uing samples of n(z))
+        if not hasattr(self, "zmax"):
+            zmax = 4.66
+        else:
+            zmax = self.zmax
+
+        class_arguments = {
+            'z_max_pk': zmax,
+            'output': 'mPk',
+            'non linear': self.settings.mode,
+            'P_k_max_h/Mpc': self.settings.k_max_h_by_Mpc}
+
+        cosmo = Class()
+
+        # input cosmologies
+        cosmo.set(cosmo_params)
+
+        # settings for clASS (halofit etc)
+        cosmo.set(class_arguments)
+
+        # other settings for neutrino
+        cosmo.set(other_settings)
+
+        # neutrino settings
+        cosmo.set(neutrino_settings)
+
+        # compute power spectrum
+        cosmo.compute()
+
+        # calculate sigma_x 
+        sigma_x = cosmo.sigma(r_Mpc_per_h, z)
+
+        # Clean up to prevent memory overflow
+        cosmo.struct_cleanup()
+        cosmo.empty()
+        del cosmo
+
+        return sigma_x
+
     def lensing_bandpowers(self, par):
         '''
         Inputs:
-            matter_pk (np.ndarray): the matter power spectrum
+            par (np.ndarray): the set of input parameters to calculate the bandpowers
 
         Outputs:
             ee_bp (np.ndarray): the ee bandpowers
@@ -629,23 +685,34 @@ class KiDSlike:
         Outputs:
             logl (float): the log-likelihood
         '''
+
         # check if parameters lie outside the box
         pri = [self.all_priors[i].pdf(par[i]) for i in range(len(par))]
         prodpri = np.prod(pri)
 
         if prodpri == 0.0:
-            chi2 = 2e12
+            chi2 = 2E12
 
+        
         else:
+
             # calculate the theory
             expectation = self.theory(par)
 
-            # calculate the difference
-            diff = self.band_powers - expectation
+            # sometimes CLASS returns NaN or inf at some points in parameter space
+            if np.isnan(expectation).any() or np.isinf(expectation).any():
 
-            # compute chi2
-            y_dummy = solve_triangular(self.chol_factor, diff, lower=True)
-            chi2 = y_dummy.dot(y_dummy)
+                chi2 = 2E12
+
+            else:
+
+                # calculate the difference
+                diff = self.band_powers - expectation
+
+                # compute chi2
+                y_dummy = solve_triangular(self.chol_factor, diff, lower=True)
+
+                chi2 = y_dummy.dot(y_dummy)
 
         return -0.5 * chi2
 
@@ -948,5 +1015,5 @@ if __name__ == '__main__':
 
     kids = KiDSlike(file_settings = '../settings')
     start_point = np.array([0.1295, 0.0224, 2.895, 0.9948, 0.7411, 1.0078, 0.5692, 0.0289, 0.0133, -0.0087, -1.9163])
-    kids.lensing_new(start_point)
     kids.lensing_bandpowers(start_point)
+    kids.calculate_sigma([0.1295, 0.0224, 2.895, 0.9948, 0.7411, 0.5692], 8, 0)
