@@ -51,7 +51,7 @@ gps = MCMC_ROUTINE.moped.load_gps('gps', lhs_method=lhs_method)
 # compression = True, bootstrap_photoz_errors = True, emulator = True
 # emulator_moped_samples_nz
 
-# Done - Results not so good
+# Done (More training points?)
 # compression = True, bootstrap_photoz_errors = False, emulator = True, eight_dimensional = True
 # emulator_moped_mean_nz_eight_d
 
